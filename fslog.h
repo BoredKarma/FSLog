@@ -52,6 +52,7 @@ enum class FsColor {
     MAGENTA = 35,
     CYAN = 36,
     WHITE = 37,
+    GRAY = 90,
     BRIGHT_BLACK = 90,
     BRIGHT_RED = 91,
     BRIGHT_GREEN = 92,
