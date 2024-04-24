@@ -115,11 +115,11 @@ namespace fslog {
             #endif
         }
 
-        INLINE tm* fs_localtime(const time_t *t, struct tm* timeinfo) {
+        INLINE void fs_localtime(const time_t *t, struct tm* timeinfo) {
             #if defined(_WIN32) || defined(_WIN64)
-                return localtime_s(t, timeinfo);
+                localtime_s(timeinfo, t);
             #elif defined(__linux__)
-                return localtime_r(t, timeinfo);
+                localtime_r(t, timeinfo);
             #endif
         }
 
