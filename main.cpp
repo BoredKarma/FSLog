@@ -10,5 +10,6 @@ int main(int, char**) {
         }
     } // logger.~threading_logger()
 
-    fslog::debug("Done, this should be printed last.");
+    int test = 42;
+    fslog::debug("Done, this should be printed last. {}", (void*)&test);
 }

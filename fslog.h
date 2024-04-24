@@ -26,19 +26,19 @@
 #endif
 
 #define FS_LINE __LINE__
-#define FS_META fslog::CallInfo{get_file_name(__FILE__), FS_LINE}
+#define FS_META fslog::CallInfo{__fs_get_file_name(__FILE__), FS_LINE}
 #define FS_POINT FS_DEBUG, "{}", FS_FUNC
 
 #define FSLOG_PROCESS inline std::string process
 #define FSLOG_PROCESS_DEFAULT(type) FSLOG_PROCESS(type arg) { return std::to_string(arg); }
 
-INLINE std::string get_file_name(const std::string& path) {
+INLINE std::string __fs_get_file_name(const std::string& path) {
     size_t pos = path.find_last_of("/\\");
     return (pos != std::string::npos) ? path.substr(pos + 1) : path;
 }
 
-#if defined(_WIN32) || defined(_WIN64)
-    enum class FsColor {
+enum class FsColor {
+    #if defined(_WIN32) || defined(_WIN64)
         RED = FOREGROUND_RED,
         BLUE = FOREGROUND_BLUE,
         GREEN = FOREGROUND_GREEN,
@@ -46,25 +46,16 @@ INLINE std::string get_file_name(const std::string& path) {
         GRAY = FOREGROUND_INTENSITY,
         YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
         CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
-    };
-
-    INLINE void setcolor(FsColor color) {
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), static_cast<int>(color));
-    }
-#elif defined(__linux__)
-    enum class FsColor {
-        RED = 31,
-        BLUE = 34,
-        GREEN = 32,
-        WHITE = 37,
-        GRAY = 90,
-        YELLOW = 33,
-    };
-
-    INLINE void setcolor(FsColor color) {
-        printf("\033[%dm", static_cast<int>(color));
-    }
-#endif
+    #elif defined(__linux__)
+            RED = 31,
+            BLUE = 34,
+            GREEN = 32,
+            WHITE = 37,
+            GRAY = 90,
+            YELLOW = 33,
+            CYAN = 36,
+    #endif
+};
 
 namespace fslog {
     struct LogColors {
@@ -97,8 +88,8 @@ namespace fslog {
 
         FSLOG_PROCESS(void* arg) {
             char buffer[32] = { 0 };
-            std::snprintf(buffer, sizeof(buffer), "0x%llx",
-                static_cast<int64_t>(reinterpret_cast<uintptr_t>(arg))
+            std::snprintf(buffer, sizeof(buffer), "%p",
+                reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(arg))
             );
             return std::string(buffer);
         }
@@ -116,13 +107,29 @@ namespace fslog {
             #endif
         }
 
+        INLINE void setcolor(FsColor color) {
+            #if defined(_WIN32) || defined(_WIN64)
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), static_cast<int>(color));
+            #elif defined(__linux__)
+                printf("\033[%dm", static_cast<int>(color));
+            #endif
+        }
+
+        INLINE tm* fs_localtime(const time_t *t, struct tm* timeinfo) {
+            #if defined(_WIN32) || defined(_WIN64)
+                return localtime_s(t, timeinfo);
+            #elif defined(__linux__)
+                return localtime_r(t, timeinfo);
+            #endif
+        }
+
         std::string get_time() {
             char buf[32] = { 0 };
             time_t now_time;
             time(&now_time);
 
             struct tm timeinfo;
-            localtime_s(&timeinfo, &now_time);
+            fs_localtime(&now_time, &timeinfo);
             strftime(buf, sizeof(buf), "%H:%M:%S", &timeinfo);
 
             return buf;
@@ -147,9 +154,7 @@ namespace fslog {
                 types::process(args)... 
             };
 
-            size_t pos = 0;
             size_t arg_index = 0;
-
             for (size_t i = 0; i < fmt.length(); ++i) {
                 if (fmt[i] == '{' && i + 1 < fmt.length() && fmt[i + 1] == '}') {
                     if (arg_index < num_args) {
