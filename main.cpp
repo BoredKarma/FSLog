@@ -1,15 +1,11 @@
 #include "fslog.h"
-#include "fslog_thread.h"
+#include "timer.h"
 
 int main(int, char**) {
     {
-        fslog::threading_logger logger;
+        Timer timer("test");
 
-        for (int i = 0; i < 1000; i++) {
-            logger.debug(FS_META, "Hello, this is {}!", i);
-        }
-    } // logger.~threading_logger()
-
-    int test = 42;
-    fslog::debug("Done, this should be printed last. {}", (void*)&test);
+        for (int i = 0; i < 1000; ++i)
+            printf("The answer is %d", 42);
+    }
 }
