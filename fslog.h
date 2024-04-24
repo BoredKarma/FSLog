@@ -197,10 +197,10 @@ namespace fslog {
     }
 
     template<typename... Args> void debug(const std::string& fmt, Args... args) {
-        log("Debug", debug_colors, fmt, args...);
+        log("DEBUG", debug_colors, fmt, args...);
     }
     template<typename... Args> void debug(const CallInfo& call, const std::string& fmt, Args... args) {
-        log("Debug", call, debug_colors, fmt, args...);
+        log("DEBUG", call, debug_colors, fmt, args...);
     }
 
     template<typename... Args> void info(const std::string& fmt, Args... args) {
