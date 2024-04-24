@@ -47,13 +47,13 @@ enum class FsColor {
         YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
         CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
     #elif defined(__linux__)
-            RED = 31,
-            BLUE = 34,
-            GREEN = 32,
-            WHITE = 37,
-            GRAY = 90,
-            YELLOW = 33,
-            CYAN = 36,
+        RED = 31,
+        BLUE = 34,
+        GREEN = 32,
+        WHITE = 37,
+        GRAY = 90,
+        YELLOW = 33,
+        CYAN = 36,
     #endif
 };
 
