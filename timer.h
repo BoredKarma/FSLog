@@ -14,7 +14,6 @@ public:
         auto end = std::chrono::high_resolution_clock::now();
         elapsed = end - start_;
         std::cout << name_ << ": " << elapsed.count() << "ms" << std::endl;
-        //total += elapsed.count();
     }
 
     Timer(const Timer&) = delete;

@@ -22,7 +22,7 @@
     #define FS_FUNC __PRETTY_FUNCTION__
 #else
     #define INLINE inline
-    #error "HAHAJSHSHAAHA!!!!"
+    #error "Unsupported compiler :("
 #endif
 
 #define FS_LINE __LINE__
@@ -32,29 +32,35 @@
 #define FSLOG_PROCESS inline std::string process
 #define FSLOG_PROCESS_DEFAULT(type) FSLOG_PROCESS(type arg) { return std::to_string(arg); }
 
+#ifdef FSLOG_DEBUG
+    #define FSLOG_DEBUG_PRINT(x) printf("fslog.h: " x "\n")
+#else
+    #define FSLOG_DEBUG_PRINT(x)
+#endif
+
 INLINE std::string __fs_get_file_name(const std::string& path) {
     size_t pos = path.find_last_of("/\\");
     return (pos != std::string::npos) ? path.substr(pos + 1) : path;
 }
 
 enum class FsColor {
-    #if defined(_WIN32) || defined(_WIN64)
-        RED = FOREGROUND_RED,
-        BLUE = FOREGROUND_BLUE,
-        GREEN = FOREGROUND_GREEN,
-        WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-        GRAY = FOREGROUND_INTENSITY,
-        YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
-        CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
-    #elif defined(__linux__)
-        RED = 31,
-        BLUE = 34,
-        GREEN = 32,
-        WHITE = 37,
-        GRAY = 90,
-        YELLOW = 33,
-        CYAN = 36,
-    #endif
+    BLACK = 30,
+    RED = 31,
+    GREEN = 32,
+    YELLOW = 33,
+    BLUE = 34,
+    MAGENTA = 35,
+    CYAN = 36,
+    WHITE = 37,
+    GRAY = 90,
+    BRIGHT_BLACK = 90,
+    BRIGHT_RED = 91,
+    BRIGHT_GREEN = 92,
+    BRIGHT_YELLOW = 93,
+    BRIGHT_BLUE = 94,
+    BRIGHT_MAGENTA = 95,
+    BRIGHT_CYAN = 96,
+    BRIGHT_WHITE = 97
 };
 
 namespace fslog {
@@ -73,6 +79,41 @@ namespace fslog {
     static LogColors info_colors = { FsColor::GRAY, FsColor::CYAN, FsColor::WHITE };
     static LogColors warn_colors = { FsColor::GRAY, FsColor::YELLOW, FsColor::WHITE };
     static LogColors error_colors = { FsColor::GRAY, FsColor::RED, FsColor::WHITE };
+
+    static bool has_setup = false;
+    
+    void setup() {
+        #if defined(_WIN32) || defined(_WIN64)
+            if (!has_setup) {
+                FSLOG_DEBUG_PRINT("Setting up");
+
+                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                if (hOut == INVALID_HANDLE_VALUE) {
+                    printf("fslog.h: Unable to get console handle\n");
+                    return;
+                }
+
+                DWORD dwMode = 0;
+                if (!GetConsoleMode(hOut, &dwMode)) {
+                    printf("fslog.h: Unable to get console mode\n");
+                    return;
+                }
+
+                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                if (!SetConsoleMode(hOut, dwMode)) {
+                    printf("fslog.h: Unable to set console mode\n");
+                    return;
+                }
+                
+                has_setup = true;
+            }
+            else {
+                FSLOG_DEBUG_PRINT("Already setup");
+            }
+        #elif defined(__linux__)
+            has_setup = true;
+        #endif
+    }
 
     namespace types {
         FSLOG_PROCESS_DEFAULT(int32_t)
@@ -97,50 +138,6 @@ namespace fslog {
         // FSLOG_PROCESS(const CustomType& arg) { return std::string(arg.integer_member); }
         // FSLOG_PROCESS(Unity::System_String* arg) { return arg->ToString(); }
     } // types
-
-    namespace {
-        INLINE void fs_write(const char* str, const size_t& length) {
-            #if defined(_WIN32) || defined(_WIN64)
-                WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), str, static_cast<DWORD>(length), nullptr, nullptr);
-            #elif defined(__linux__)
-                syscall(SYS_write, STDOUT_FILENO, str, length);
-            #endif
-        }
-
-        INLINE void setcolor(FsColor color) {
-            #if defined(_WIN32) || defined(_WIN64)
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), static_cast<int>(color));
-            #elif defined(__linux__)
-                printf("\033[%dm", static_cast<int>(color));
-            #endif
-        }
-
-        INLINE void fs_localtime(const time_t *t, struct tm* timeinfo) {
-            #if defined(_WIN32) || defined(_WIN64)
-                localtime_s(timeinfo, t);
-            #elif defined(__linux__)
-                localtime_r(t, timeinfo);
-            #endif
-        }
-
-        std::string get_time() {
-            char buf[32] = { 0 };
-            time_t now_time;
-            time(&now_time);
-
-            struct tm timeinfo;
-            fs_localtime(&now_time, &timeinfo);
-            strftime(buf, sizeof(buf), "%H:%M:%S", &timeinfo);
-
-            return buf;
-        }
-
-        void p_brackets(const std::string& fmt, FsColor bracket, FsColor text) {
-            setcolor(bracket);  fs_write("[", 1);
-            setcolor(text);     fs_write(fmt.c_str(), fmt.length());
-            setcolor(bracket);  fs_write("] ", 2);
-        }
-    } // details
 
     namespace fmt {
         template<typename... Args>
@@ -173,27 +170,69 @@ namespace fslog {
             return result;
         }
     } // fmt
+    
+    namespace {
+        INLINE void fs_write(const char* str, const size_t& length) {
+            #if defined(_WIN32) || defined(_WIN64)
+                WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), str, static_cast<DWORD>(length), nullptr, nullptr);
+            #elif defined(__linux__)
+                syscall(SYS_write, STDOUT_FILENO, str, length);
+            #endif
+        }
+
+        INLINE std::string setcolor(FsColor color) {
+            return "\033[" + std::to_string(static_cast<int>(color)) + "m";
+        }
+
+        INLINE void fs_localtime(const time_t *t, struct tm* timeinfo) {
+            #if defined(_WIN32) || defined(_WIN64)
+                localtime_s(timeinfo, t);
+            #elif defined(__linux__)
+                localtime_r(t, timeinfo);
+            #endif
+        }
+
+        std::string get_time() {
+            char buf[32] = { 0 };
+            time_t now_time;
+            time(&now_time);
+
+            struct tm timeinfo;
+            fs_localtime(&now_time, &timeinfo);
+            strftime(buf, sizeof(buf), "%H:%M:%S", &timeinfo);
+
+            return buf;
+        }
+
+        INLINE std::string p_brackets(const std::string& fmt, const LogColors& colors) {
+            return fmt::format("{}[{}{}{}]{}", 
+                fslog::setcolor(colors.bracket), fslog::setcolor(colors.prefix), fmt, fslog::setcolor(colors.bracket), fslog::setcolor(FsColor::WHITE)
+            );
+        }
+    } // details
 
     template<typename... Args>
     void log(const std::string& type, const LogColors& colors, const std::string& fmt, Args... args) {
-        std::string formatted = fmt::format(fmt, args...) + '\n';
-        p_brackets(get_time(), colors.bracket, colors.prefix);
-        p_brackets(type, colors.bracket, colors.prefix);
+        if (!has_setup) { 
+            fslog::setup(); 
+        }
 
-        setcolor(colors.text);
+        std::string formatted = fslog::fmt::format("{} {} {}{}\n",
+            p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, args...)
+        );
         fs_write(formatted.c_str(), formatted.length());
-        setcolor(FsColor::WHITE);
     }
     template<typename... Args>
     void log(const std::string& type, const CallInfo& call, const LogColors& colors, const std::string& fmt, Args... args) {
-        std::string formatted = fmt::format(fmt, args...) + '\n';
-        p_brackets(get_time(), colors.bracket, colors.prefix);
-        p_brackets(type, colors.bracket, colors.prefix);
-        p_brackets(fmt::format("{}:{}", call.file, call.line), colors.bracket, colors.prefix);
+        if (!has_setup) { 
+            fslog::setup(); 
+        }
 
-        setcolor(colors.text);
+        std::string formatted = fslog::fmt::format("{} {} {} {}{}\n",
+            p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fmt::format("{}:{}", call.file, call.line), colors), 
+            fslog::setcolor(colors.text), fslog::fmt::format(fmt, args...)
+        );
         fs_write(formatted.c_str(), formatted.length());
-        setcolor(FsColor::WHITE);
     }
 
     template<typename... Args> void debug(const std::string& fmt, Args... args) {
