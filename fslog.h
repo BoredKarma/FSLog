@@ -22,7 +22,7 @@
     #define FS_FUNC __PRETTY_FUNCTION__
 #else
     #define INLINE inline
-    #error "HAHAJSHSHAAHA!!!!"
+    #error "Unsupported compiler :("
 #endif
 
 #define FS_LINE __LINE__
