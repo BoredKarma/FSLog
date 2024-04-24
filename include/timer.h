@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-std::chrono::duration<double, std::milli> elapsed;
+#include "fslog.h"
 
 class Timer {
 public:
@@ -12,8 +12,8 @@ public:
 
     ~Timer() {
         auto end = std::chrono::high_resolution_clock::now();
-        elapsed = end - start_;
-        std::cout << name_ << ": " << elapsed.count() << "ms" << std::endl;
+        std::chrono::duration<double, std::milli> elapsed = end - start_;
+        fslog::info("{}: {}ms", name_, elapsed.count());
     }
 
     Timer(const Timer&) = delete;
