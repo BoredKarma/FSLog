@@ -44,23 +44,13 @@ INLINE std::string __fs_get_file_name(const std::string& path) {
 }
 
 enum class FsColor {
-    // #if defined(_WIN32) || defined(_WIN64)
-    //     RED = FOREGROUND_RED,
-    //     BLUE = FOREGROUND_BLUE,
-    //     GREEN = FOREGROUND_GREEN,
-    //     WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-    //     GRAY = FOREGROUND_INTENSITY,
-    //     YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
-    //     CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
-    // #elif defined(__linux__)
-        RED = 31,
-        BLUE = 34,
-        GREEN = 32,
-        WHITE = 37,
-        GRAY = 90,
-        YELLOW = 33,
-        CYAN = 36,
-    //#endif
+    RED = 31,
+    BLUE = 34,
+    GREEN = 32,
+    WHITE = 37,
+    GRAY = 90,
+    YELLOW = 33,
+    CYAN = 36,
 };
 
 namespace fslog {
@@ -83,33 +73,36 @@ namespace fslog {
     static bool has_setup = false;
     
     void setup() {
-        if (!has_setup) {
-            FSLOG_DEBUG_PRINT("Setting up");
+        #if defined(_WIN32) || defined(_WIN64)
+            if (!has_setup) {
+                FSLOG_DEBUG_PRINT("Setting up");
 
-            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-            if (hOut == INVALID_HANDLE_VALUE) {
-                printf("fslog.h: Unable to get console handle\n");
-                return;
-            }
+                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                if (hOut == INVALID_HANDLE_VALUE) {
+                    printf("fslog.h: Unable to get console handle\n");
+                    return;
+                }
 
-            DWORD dwMode = 0;
-            if (!GetConsoleMode(hOut, &dwMode)) {
-                printf("fslog.h: Unable to get console mode\n");
-                return;
-            }
+                DWORD dwMode = 0;
+                if (!GetConsoleMode(hOut, &dwMode)) {
+                    printf("fslog.h: Unable to get console mode\n");
+                    return;
+                }
 
-            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-            if (!SetConsoleMode(hOut, dwMode)) {
-                printf("fslog.h: Unable to set console mode\n");
-                return;
+                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                if (!SetConsoleMode(hOut, dwMode)) {
+                    printf("fslog.h: Unable to set console mode\n");
+                    return;
+                }
+                
+                has_setup = true;
             }
-            
-            FSLOG_DEBUG_PRINT("Setup succeeded");
+            else {
+                FSLOG_DEBUG_PRINT("Already setup");
+            }
+        #elif defined(__linux__)
             has_setup = true;
-        }
-        else {
-            FSLOG_DEBUG_PRINT("Already setup");
-        }
+        #endif
     }
 
     namespace types {
