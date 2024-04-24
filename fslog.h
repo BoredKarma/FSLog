@@ -4,6 +4,7 @@
 #include <chrono>
 #include <vector>
 #include <array>
+#include <cinttypes>
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
@@ -129,8 +130,8 @@ namespace fslog {
 
         FSLOG_PROCESS(void* arg) {
             char buffer[32] = { 0 };
-            std::snprintf(buffer, sizeof(buffer), "%p",
-                reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(arg))
+            std::snprintf(buffer, sizeof(buffer), "0x%" PRIxPTR,
+                reinterpret_cast<uintptr_t>(arg)
             );
             return std::string(buffer);
         }
