@@ -4,9 +4,9 @@
 
 int main(int, char**) {
     {
-        Timer timer("test");
+        Timer timer("10000x fslog::debug()");
 
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i < 10000; ++i)
             fslog::debug("The answer is {}", 42);
     }
 }
