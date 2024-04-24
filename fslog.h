@@ -81,6 +81,7 @@ namespace fslog {
     static LogColors error_colors = { FsColor::GRAY, FsColor::RED, FsColor::WHITE };
 
     static bool has_setup = false;
+    
     void setup() {
         if (!has_setup) {
             FSLOG_DEBUG_PRINT("Setting up");
