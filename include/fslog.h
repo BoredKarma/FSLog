@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <cinttypes>
+#include <typeinfo>
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
@@ -135,9 +136,23 @@ namespace fslog {
             );
             return std::string(buffer);
         }
-
         // FSLOG_PROCESS(const CustomType& arg) { return std::string(arg.integer_member); }
         // FSLOG_PROCESS(Unity::System_String* arg) { return arg->ToString(); }
+
+        template <typename T>
+        FSLOG_PROCESS(const T& arg) {
+            static_assert(!std::is_pointer<T>::value, "FSLOG_PROCESS: Unknown pointer type");
+            static_assert(!std::is_array<T>::value, "FSLOG_PROCESS: Unknown array type");
+            static_assert(!std::is_enum<T>::value, "FSLOG_PROCESS: Unknown enum type");
+            static_assert(!std::is_class<T>::value, "FSLOG_PROCESS: Unknown class type");
+            static_assert(!std::is_union<T>::value, "FSLOG_PROCESS: Unknown union type");
+            static_assert(!std::is_reference<T>::value, "FSLOG_PROCESS: Unknown reference type");
+            static_assert(!std::is_void<T>::value, "FSLOG_PROCESS: Unknown void type");
+            static_assert(!std::is_function<T>::value, "FSLOG_PROCESS: Unknown function type");
+            static_assert(!std::is_floating_point<T>::value, "FSLOG_PROCESS: Unknown floating point type");
+            static_assert(!std::is_integral<T>::value, "FSLOG_PROCESS: Unknown integral type");
+            return "unknown_type";
+        }
     } // types
 
     namespace fmt {

@@ -2,6 +2,10 @@
 #include "fslog.h"
 #include "timer.h"
 
+struct Custom {
+    int a, b;
+};
+
 int main(int, char**) {
     {
         Timer timer("1000x fslog::debug()");
@@ -12,4 +16,7 @@ int main(int, char**) {
 
     int test = 42;
     fslog::warn("The answer is {}", (void*)&test);
+
+    Custom custom = { 1, 2 };
+    fslog::error("The answer is {}", custom);
 }
