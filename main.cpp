@@ -17,6 +17,6 @@ int main(int, char**) {
     int test = 42;
     fslog::warn("The answer is {}", (void*)&test);
 
-    Custom custom = { 1, 2 };
-    fslog::error("The answer is {}", custom);
+    // Custom custom = { 1, 2 };
+    // fslog::error("The answer is {}", custom); error: static assertion failed: FSLOG_PROCESS: Unknown class type
 }
