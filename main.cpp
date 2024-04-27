@@ -1,6 +1,7 @@
 #define FSLOG_DEBUG
-#include "fslog.h"
 #include "timer.h"
+#include "fslog.h"
+
 
 struct Custom {
     int a, b;
@@ -15,7 +16,11 @@ int main(int, char**) {
     }
 
     int test = 42;
-    fslog::warn("The answer is {}", (void*)&test);
+    void* test2 = (void*)0x100;
+    void* test3 = (void*)9223372036854775807;
+    fslog::warn("test:  {}", (void*)&test);
+    fslog::warn("test2: {}", test2);
+    fslog::warn("test3: {}", test3);
 
     // Custom custom = { 1, 2 };
     // fslog::error("The answer is {}", custom); error: static assertion failed: FSLOG_PROCESS: Unknown class type

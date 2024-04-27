@@ -130,11 +130,25 @@ namespace fslog {
         FSLOG_PROCESS(const char* arg) { return arg; }
 
         FSLOG_PROCESS(void* arg) {
-            char buffer[32] = { 0 };
-            std::snprintf(buffer, sizeof(buffer), "0x%" PRIxPTR,
-                reinterpret_cast<uintptr_t>(arg)
-            );
-            return std::string(buffer);
+            if (arg == nullptr) {
+                return "0x0";
+            }
+
+            uintptr_t value = reinterpret_cast<uintptr_t>(arg);
+            const char hex_digits[] = "0123456789abcdef";
+
+            char result[20] = {'\0'};
+            int pos = sizeof(result) / sizeof(char) - 2;
+
+            do {
+                result[pos--] = hex_digits[value % 16];
+                value /= 16;
+            } while (value != 0);
+
+            result[pos--] = 'x';
+            result[pos--] = '0';
+
+            return std::string(result + pos + 1);
         }
         // FSLOG_PROCESS(const CustomType& arg) { return std::string(arg.integer_member); }
         // FSLOG_PROCESS(Unity::System_String* arg) { return arg->ToString(); }
