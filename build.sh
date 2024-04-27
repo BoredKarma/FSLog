@@ -1,7 +1,7 @@
 #!/bin/bash
 
 COMPILER="g++"
-FLAGS="-std=c++14 -pthread -fexceptions -Werror -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference"
+FLAGS="-std=c++14 -pthread -Werror -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference -Wno-unused-parameter"
 INCLUDE_DIR="include"
 
 SOURCE="main.cpp"

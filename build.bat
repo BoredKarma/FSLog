@@ -1,7 +1,7 @@
 @echo off
 
 set COMPILER=g++
-set FLAGS=-std=c++14 -fexceptions -Werror -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference
+set FLAGS=-std=c++14 -Werror -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference -Wno-unused-parameter
 set SOURCE=main.cpp
 set INCLUDE_DIR=include
 
