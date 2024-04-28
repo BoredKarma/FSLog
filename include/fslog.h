@@ -150,6 +150,7 @@ namespace fslog {
 
             return std::string(result + pos + 1);
         }
+
         // FSLOG_PROCESS(const CustomType& arg) { return std::string(arg.integer_member); }
         // FSLOG_PROCESS(Unity::System_String* arg) { return arg->ToString(); }
 
@@ -171,14 +172,14 @@ namespace fslog {
 
     namespace fmt {
         template<typename... Args>
-        std::string format(const std::string& fmt, Args... args) {
+        std::string format(const std::string& fmt, Args&&... args) {
             const size_t num_args = sizeof...(args);
             if (!num_args) return fmt;
 
             std::string result;
             result.reserve(fmt.length() + num_args * 10);
             const std::array<std::string, sizeof...(args)> fmt_args = { 
-                types::process(args)... 
+                types::process(std::forward<Args>(args))... 
             };
 
             size_t arg_index = 0;
@@ -202,7 +203,7 @@ namespace fslog {
     } // fmt
     
     namespace {
-        INLINE void fs_write(const char* str, const size_t& length) {
+        INLINE void fs_write(const char* str, size_t length) {
             #if defined(_WIN32) || defined(_WIN64)
                 WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), str, static_cast<DWORD>(length), nullptr, nullptr);
             #elif defined(__linux__)
@@ -242,54 +243,55 @@ namespace fslog {
     } // details
 
     template<typename... Args>
-    void log(const std::string& type, const LogColors& colors, const std::string& fmt, Args... args) {
+    void log(const std::string& type, const LogColors& colors, const std::string& fmt, Args&&... args) {
         if (!has_setup) { 
             fslog::setup(); 
         }
 
         std::string formatted = fslog::fmt::format("{} {} {}{}\n",
-            p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, args...)
+            p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
         fs_write(formatted.c_str(), formatted.length());
     }
+
     template<typename... Args>
-    void log(const std::string& type, const CallInfo& call, const LogColors& colors, const std::string& fmt, Args... args) {
+    void log(const std::string& type, const CallInfo& call, const LogColors& colors, const std::string& fmt, Args&&... args) {
         if (!has_setup) { 
             fslog::setup(); 
         }
 
         std::string formatted = fslog::fmt::format("{} {} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fmt::format("{}:{}", call.file, call.line), colors), 
-            fslog::setcolor(colors.text), fslog::fmt::format(fmt, args...)
+            fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
         fs_write(formatted.c_str(), formatted.length());
     }
 
-    template<typename... Args> void debug(const std::string& fmt, Args... args) {
-        log("DEBUG", debug_colors, fmt, args...);
+    template<typename... Args> void debug(const std::string& fmt, Args&&... args) {
+        log("DEBUG", debug_colors, fmt, std::forward<Args>(args)...);
     }
-    template<typename... Args> void debug(const CallInfo& call, const std::string& fmt, Args... args) {
-        log("DEBUG", call, debug_colors, fmt, args...);
-    }
-
-    template<typename... Args> void info(const std::string& fmt, Args... args) {
-        log("INFO", info_colors, fmt, args...);
-    }
-    template<typename... Args> void info(const CallInfo& call, const std::string& fmt, Args... args) {
-        log("INFO", call, info_colors, fmt, args...);
+    template<typename... Args> void debug(const CallInfo& call, const std::string& fmt, Args&&... args) {
+        log("DEBUG", call, debug_colors, fmt, std::forward<Args>(args)...);
     }
 
-    template<typename... Args> void warn(const std::string& fmt, Args... args) {
-        log("WARN", warn_colors, fmt, args...);
+    template<typename... Args> void info(const std::string& fmt, Args&&... args) {
+        log("INFO", info_colors, fmt, std::forward<Args>(args)...);
     }
-    template<typename... Args> void warn(const CallInfo& call, const std::string& fmt, Args... args) {
-        log("WARN", call, warn_colors, fmt, args...);
+    template<typename... Args> void info(const CallInfo& call, const std::string& fmt, Args&&... args) {
+        log("INFO", call, info_colors, fmt, std::forward<Args>(args)...);
     }
 
-    template<typename... Args> void error(const std::string& fmt, Args... args) {
-        log("ERROR", error_colors, fmt, args...);
+    template<typename... Args> void warn(const std::string& fmt, Args&&... args) {
+        log("WARN", warn_colors, fmt, std::forward<Args>(args)...);
     }
-    template<typename... Args> void error(const CallInfo& call, const std::string& fmt, Args... args) {
-        log("ERROR", call, error_colors, fmt, args...);
+    template<typename... Args> void warn(const CallInfo& call, const std::string& fmt, Args&&... args) {
+        log("WARN", call, warn_colors, fmt, std::forward<Args>(args)...);
+    }
+
+    template<typename... Args> void error(const std::string& fmt, Args&&... args) {
+        log("ERROR", error_colors, fmt, std::forward<Args>(args)...);
+    }
+    template<typename... Args> void error(const CallInfo& call, const std::string& fmt, Args&&... args) {
+        log("ERROR", call, error_colors, fmt, std::forward<Args>(args)...);
     }
 } // fslog
