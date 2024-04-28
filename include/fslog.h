@@ -29,7 +29,7 @@
 
 #define FS_LINE __LINE__
 #define FS_META fslog::CallInfo{__fs_get_file_name(__FILE__), FS_LINE}
-#define FS_POINT FS_DEBUG, "{}", FS_FUNC
+#define FS_POINT FS_META, "{}", FS_FUNC
 
 #define FSLOG_PROCESS inline std::string process
 #define FSLOG_PROCESS_DEFAULT(type) FSLOG_PROCESS(type arg) { return std::to_string(arg); }
