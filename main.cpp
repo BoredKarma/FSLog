@@ -1,6 +1,6 @@
 #define FSLOG_DEBUG
-#include "timer.h"
 #include "fslog.h"
+#include "timer.h"
 
 struct Custom {
     int a, b;

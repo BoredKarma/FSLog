@@ -1,10 +1,10 @@
 #pragma once
 
+#include <time.h>
+#include <inttypes.h>
+
 #include <string>
-#include <chrono>
-#include <vector>
 #include <array>
-#include <cinttypes>
 #include <typeinfo>
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -184,16 +184,18 @@ namespace fslog {
 
             size_t arg_index = 0;
             for (size_t i = 0; i < fmt.length(); ++i) {
-                if (fmt[i] == '{' && i + 1 < fmt.length() && fmt[i + 1] == '}') {
-                    if (arg_index < num_args) {
-                        result += fmt_args[arg_index++];
-                        i++;
-                    }
-                    else {
+                if (fmt[i] == '{') {
+                    if (i + 1 < fmt.length() && fmt[i + 1] == '}') {
+                        if (arg_index < num_args) {
+                            result += fmt_args[arg_index++];
+                            i++;
+                        } else {
+                            result += "{";
+                        }
+                    } else {
                         result += "{";
                     }
-                }
-                else {
+                } else {
                     result += fmt[i];
                 }
             }
