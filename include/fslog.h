@@ -199,7 +199,7 @@ namespace fslog {
         template<typename... Args>
         std::string _format(const std::string& fmt, Args&&... args) {
             const size_t num_args = sizeof...(args);
-            size_t fmt_size = fmt.length();
+            const size_t fmt_size = fmt.length();
             if (!num_args) return fmt;
 
             std::string result;
