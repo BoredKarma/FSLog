@@ -27,18 +27,92 @@
     #error "Unsupported compiler :("
 #endif
 
-#define FS_LINE __LINE__
-#define FS_META fslog::CallInfo{__fs_get_file_name(__FILE__), FS_LINE}
-#define FS_POINT FS_META, "{}", FS_FUNC
+// Private macros
 
-#define FSLOG_PROCESS inline std::string process
-#define FSLOG_PROCESS_DEFAULT(type) FSLOG_PROCESS(type arg) { return std::to_string(arg); }
+#define _FS_LINE                     __LINE__
+#define _FSLOG_PROCESS               inline std::string process
+#define _FSLOG_PROCESS_DEFAULT(type) _FSLOG_PROCESS(type arg) { return std::to_string(arg); }
 
-#ifdef FSLOG_DEBUG
-    #define FSLOG_DEBUG_PRINT(x) printf("fslog.h: " x "\n")
-#else
-    #define FSLOG_DEBUG_PRINT(x)
+// Formatting types, edit these if you want your custom types to work with the formatting
+
+namespace fslog {
+    namespace types {
+        _FSLOG_PROCESS_DEFAULT(int32_t)
+        _FSLOG_PROCESS_DEFAULT(uint32_t)
+        _FSLOG_PROCESS_DEFAULT(int64_t)
+        _FSLOG_PROCESS_DEFAULT(uint64_t)
+        _FSLOG_PROCESS_DEFAULT(double)
+        _FSLOG_PROCESS_DEFAULT(float)
+
+        _FSLOG_PROCESS(bool arg) { return std::string(arg ? "true" : "false"); }
+        _FSLOG_PROCESS(const std::string& arg) { return arg; }
+        _FSLOG_PROCESS(const char* arg) { return arg; }
+
+        _FSLOG_PROCESS(void* arg) {
+            if (arg == nullptr) {
+                return "0x0";
+            }
+
+            uintptr_t value = reinterpret_cast<uintptr_t>(arg);
+            const char hex_digits[] = "0123456789abcdef";
+
+            char result[20] = {'\0'};
+            int pos = sizeof(result) / sizeof(char) - 2;
+
+            do {
+                result[pos--] = hex_digits[value % 16];
+                value /= 16;
+            } while (value != 0);
+
+            result[pos--] = 'x';
+            result[pos--] = '0';
+
+            return std::string(result + pos + 1);
+        }
+
+        // _FSLOG_PROCESS(const CustomType& arg) { return std::string(arg.integer_member); }
+        // _FSLOG_PROCESS(Unity::System_String* arg) { return arg->ToString(); }
+
+        template <typename T>
+        _FSLOG_PROCESS(const T& arg) {
+            static_assert(!std::is_pointer<T>::value, "_FSLOG_PROCESS: Unknown pointer type");
+            static_assert(!std::is_array<T>::value, "_FSLOG_PROCESS: Unknown array type");
+            static_assert(!std::is_enum<T>::value, "_FSLOG_PROCESS: Unknown enum type");
+            static_assert(!std::is_class<T>::value, "_FSLOG_PROCESS: Unknown class type");
+            static_assert(!std::is_union<T>::value, "_FSLOG_PROCESS: Unknown union type");
+            static_assert(!std::is_reference<T>::value, "_FSLOG_PROCESS: Unknown reference type");
+            static_assert(!std::is_void<T>::value, "_FSLOG_PROCESS: Unknown void type");
+            static_assert(!std::is_function<T>::value, "_FSLOG_PROCESS: Unknown function type");
+            static_assert(!std::is_floating_point<T>::value, "_FSLOG_PROCESS: Unknown floating point type");
+            static_assert(!std::is_integral<T>::value, "_FSLOG_PROCESS: Unknown integral type");
+            return "unknown_type";
+        }
+    } // types
+}
+
+// Config
+
+#define _FSLOG_UPPER_PVOID    1
+
+#ifdef FSLOG_TEST
+    #include "fslog_test.h"
+
+    #define _FSLOG_EXP_STYLE_FMT       1  // Use experimental, C# style formatting
+    #define _FSLOG_EXP_OPTIMIZED_FMT   1  // Use experimental, optimized formatting
 #endif
+
+// Public macros
+
+// Used for logging call info. fslog::<loggingfunc>(FS_META, ...)
+#define FS_META  fslog::CallInfo{__fs_get_file_name(__FILE__), _FS_LINE}
+// Used for logging where the function was called. fslog::<loggingfunc>(FS_POINT)
+#ifdef _FSLOG_EXP_STYLE_FMT
+    #define FS_POINT FS_META, "{0}", FS_FUNC
+#else
+    #define FS_POINT FS_META, "{}", FS_FUNC
+#endif
+
+// FSLog start
 
 INLINE std::string __fs_get_file_name(const std::string& path) {
     size_t pos = path.find_last_of("/\\");
@@ -87,8 +161,6 @@ namespace fslog {
     void setup() {
         #if defined(_WIN32) || defined(_WIN64)
             if (!has_setup) {
-                FSLOG_DEBUG_PRINT("Setting up");
-
                 HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
                 if (hOut == INVALID_HANDLE_VALUE) {
                     printf("fslog.h: Unable to get console handle\n");
@@ -109,83 +181,28 @@ namespace fslog {
                 
                 has_setup = true;
             }
-            else {
-                FSLOG_DEBUG_PRINT("Already setup");
-            }
         #elif defined(__linux__)
             has_setup = true;
         #endif
     }
 
-    namespace types {
-        FSLOG_PROCESS_DEFAULT(int32_t)
-        FSLOG_PROCESS_DEFAULT(uint32_t)
-        FSLOG_PROCESS_DEFAULT(int64_t)
-        FSLOG_PROCESS_DEFAULT(uint64_t)
-        FSLOG_PROCESS_DEFAULT(double)
-        FSLOG_PROCESS_DEFAULT(float)
-
-        FSLOG_PROCESS(bool arg) { return std::string(arg ? "true" : "false"); }
-        FSLOG_PROCESS(const std::string& arg) { return arg; }
-        FSLOG_PROCESS(const char* arg) { return arg; }
-
-        FSLOG_PROCESS(void* arg) {
-            if (arg == nullptr) {
-                return "0x0";
-            }
-
-            uintptr_t value = reinterpret_cast<uintptr_t>(arg);
-            const char hex_digits[] = "0123456789abcdef";
-
-            char result[20] = {'\0'};
-            int pos = sizeof(result) / sizeof(char) - 2;
-
-            do {
-                result[pos--] = hex_digits[value % 16];
-                value /= 16;
-            } while (value != 0);
-
-            result[pos--] = 'x';
-            result[pos--] = '0';
-
-            return std::string(result + pos + 1);
-        }
-
-        // FSLOG_PROCESS(const CustomType& arg) { return std::string(arg.integer_member); }
-        // FSLOG_PROCESS(Unity::System_String* arg) { return arg->ToString(); }
-
-        template <typename T>
-        FSLOG_PROCESS(const T& arg) {
-            static_assert(!std::is_pointer<T>::value, "FSLOG_PROCESS: Unknown pointer type");
-            static_assert(!std::is_array<T>::value, "FSLOG_PROCESS: Unknown array type");
-            static_assert(!std::is_enum<T>::value, "FSLOG_PROCESS: Unknown enum type");
-            static_assert(!std::is_class<T>::value, "FSLOG_PROCESS: Unknown class type");
-            static_assert(!std::is_union<T>::value, "FSLOG_PROCESS: Unknown union type");
-            static_assert(!std::is_reference<T>::value, "FSLOG_PROCESS: Unknown reference type");
-            static_assert(!std::is_void<T>::value, "FSLOG_PROCESS: Unknown void type");
-            static_assert(!std::is_function<T>::value, "FSLOG_PROCESS: Unknown function type");
-            static_assert(!std::is_floating_point<T>::value, "FSLOG_PROCESS: Unknown floating point type");
-            static_assert(!std::is_integral<T>::value, "FSLOG_PROCESS: Unknown integral type");
-            return "unknown_type";
-        }
-    } // types
-
     namespace fmt {
         template<typename... Args>
-        std::string format(const std::string& fmt, Args&&... args) {
+        std::string _format(const std::string& fmt, Args&&... args) {
             const size_t num_args = sizeof...(args);
+            size_t fmt_size = fmt.length();
             if (!num_args) return fmt;
 
             std::string result;
-            result.reserve(fmt.length() + num_args * 10);
+            result.reserve(fmt_size + num_args * 10);
             const std::array<std::string, sizeof...(args)> fmt_args = { 
                 types::process(std::forward<Args>(args))... 
             };
 
             size_t arg_index = 0;
-            for (size_t i = 0; i < fmt.length(); ++i) {
+            for (size_t i = 0; i < fmt_size; ++i) {
                 if (fmt[i] == '{') {
-                    if (i + 1 < fmt.length() && fmt[i + 1] == '}') {
+                    if (i + 1 < fmt_size && fmt[i + 1] == '}') {
                         if (arg_index < num_args) {
                             result += fmt_args[arg_index++];
                             i++;
@@ -201,6 +218,15 @@ namespace fslog {
             }
 
             return result;
+        }
+
+        template<typename... Args>
+        std::string format(const std::string& fmt, Args&&... args) {
+            #ifdef _FSLOG_EXP_STYLE_FMT
+                return fslog::exp_fmt::_format(fmt, std::forward<Args>(args)...);
+            #else
+                return fslog::fmt::_format(fmt, std::forward<Args>(args)...);
+            #endif
         }
     } // fmt
     
@@ -238,7 +264,7 @@ namespace fslog {
         }
 
         INLINE std::string p_brackets(const std::string& fmt, const LogColors& colors) {
-            return fmt::format("{}[{}{}{}]{}", 
+            return fslog::fmt::_format("{}[{}{}{}]{}", 
                 fslog::setcolor(colors.bracket), fslog::setcolor(colors.prefix), fmt, fslog::setcolor(colors.bracket), fslog::setcolor(FsColor::WHITE)
             );
         }
@@ -250,7 +276,7 @@ namespace fslog {
             fslog::setup(); 
         }
 
-        std::string formatted = fslog::fmt::format("{} {} {}{}\n",
+        std::string formatted = fslog::fmt::_format("{} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
         fs_write(formatted.c_str(), formatted.length());
@@ -262,8 +288,8 @@ namespace fslog {
             fslog::setup(); 
         }
 
-        std::string formatted = fslog::fmt::format("{} {} {} {}{}\n",
-            p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fmt::format("{}:{}", call.file, call.line), colors), 
+        std::string formatted = fslog::fmt::_format("{} {} {} {}{}\n",
+            p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fslog::fmt::_format("{}:{}", call.file, call.line), colors), 
             fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
         fs_write(formatted.c_str(), formatted.length());

@@ -1,16 +1,12 @@
-#define FSLOG_DEBUG
+//#define FSLOG_TEST
 #include "fslog.h"
 #include "timer.h"
-
-struct Custom {
-    int a, b;
-};
 
 int main(int, char**) {
     {
         Timer timer("1000x fslog::debug()");
 
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i <= 1000; ++i)
             fslog::debug("The answer is {}", i);
     }
 
@@ -23,6 +19,8 @@ int main(int, char**) {
 
     fslog::error(FS_META, "Problem!");
     fslog::error(FS_POINT);
+
+    fslog::debug("Log that uses C# styling, its {0} and {1}, {right}?", "cool", "awesome");
 
     // Custom custom = { 1, 2 };
     // fslog::error("The answer is {}", custom); error: static assertion failed: FSLOG_PROCESS: Unknown class type
