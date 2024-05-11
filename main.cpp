@@ -10,6 +10,9 @@ int main(int, char**) {
             fslog::debug("The answer is {}", i);
     }
 
+    fslog::fs_write("\n", 1);
+    fslog::info("1000x fslog::debug() took {}ms", time_elapsed);
+
     int test = 42;
     void* test2 = (void*)0x100;
     void* test3 = (void*)9223372036854775807;

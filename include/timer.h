@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+double time_elapsed = 0;
+
 class Timer {
 public:
     explicit Timer(const std::string& name) : name_(name), start_(std::chrono::high_resolution_clock::now()) {}
@@ -11,7 +13,7 @@ public:
     ~Timer() {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed = end - start_;
-        printf("%s: %fms\n", name_.c_str(), elapsed.count());
+        time_elapsed = elapsed.count();
     }
 
     Timer(const Timer&) = delete;
