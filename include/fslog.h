@@ -289,7 +289,7 @@ namespace fslog {
             fslog::setup(); 
         }
 
-        std::string formatted = fslog::fmt::_format("{} {} {}{}\n",
+        const std::string formatted = fslog::fmt::_format("{} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
         _fs_write(formatted.data(), formatted.length());
@@ -301,7 +301,7 @@ namespace fslog {
             fslog::setup(); 
         }
 
-        std::string formatted = fslog::fmt::_format("{} {} {} {}{}\n",
+        const std::string formatted = fslog::fmt::_format("{} {} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fslog::fmt::_format("{}:{}", call.file, call.line), colors), 
             fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
