@@ -286,7 +286,7 @@ namespace fslog {
         std::string formatted = fslog::fmt::_format("{} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
-        fs_write(formatted.c_str(), formatted.length());
+        fs_write(formatted.data(), formatted.length());
     }
 
     template<typename... Args>
@@ -299,7 +299,7 @@ namespace fslog {
             p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fslog::fmt::_format("{}:{}", call.file, call.line), colors), 
             fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
-        fs_write(formatted.c_str(), formatted.length());
+        fs_write(formatted.data(), formatted.length());
     }
 
     template<typename... Args> void debug(const std::string& fmt, Args&&... args) {
