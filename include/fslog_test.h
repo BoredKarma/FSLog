@@ -38,7 +38,7 @@ namespace fslog {
 
                 size_t j = i + 1;
                 std::string placeholder;
-                const int SEARCH_MAXIMUM_LENGTH = 4;
+                const int SEARCH_MAXIMUM_LENGTH = 10;
                 
                 while (j < fmt.length() && fmt[j] != '}' && placeholder.length() < SEARCH_MAXIMUM_LENGTH) {
                     placeholder += fmt[j++];
@@ -49,7 +49,7 @@ namespace fslog {
                 }
 
                 if (all_digits(placeholder)) {
-                    size_t arg_index = std::stoi(placeholder);
+                    size_t arg_index = (size_t)std::stoi(placeholder);
                     result += (arg_index < num_args) ? fmt_args[arg_index] : "{" + placeholder + "}";
                 } else {
                     if (placeholder.empty()) {
