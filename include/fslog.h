@@ -257,7 +257,7 @@ namespace fslog {
         }
 
         std::string get_time() {
-            char buf[32] = { 0 };
+            char buf[64] = { 0 };
             time_t now_time;
             time(&now_time);
 
