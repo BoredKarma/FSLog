@@ -242,7 +242,7 @@ namespace fslog {
     namespace {
         INLINE void fs_write(const char* str, size_t length) {
             #if defined(_WIN32) || defined(_WIN64)
-                WriteFile(console_handle, str, static_cast<DWORD>(length), NULL, NULL);
+                WriteFile(console_handle, str, static_cast<DWORD>(length), nullptr, nullptr);
             #elif defined(__linux__)
                 syscall(SYS_write, STDOUT_FILENO, str, length);
             #endif
