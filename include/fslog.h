@@ -110,11 +110,7 @@ namespace fslog {
 // Used for logging call info. fslog::<loggingfunc>(FS_META, ...)
 #define FS_META  fslog::CallInfo{__fs_get_file_name(__FILE__), _FS_LINE}
 // Used for logging where the function was called. fslog::<loggingfunc>(FS_POINT)
-#ifdef _FSLOG_EXP_STYLE_FMT
-    #define FS_POINT FS_META, "{0}", FS_FUNC
-#else
-    #define FS_POINT FS_META, "{}", FS_FUNC
-#endif
+#define FS_POINT FS_META, "{}", FS_FUNC
 
 // FSLog start
 
