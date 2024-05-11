@@ -22,7 +22,7 @@ To use FSLog in your project, simply include the `fslog.h` header file in your s
 Below is a simple example of the 4 different logging levels:
 
 ```cpp
-fslog::debug("This is a debug log message");
+fslog::debug("This is a debug log message"); // example: "[12:36:42] [DEBUG] This is a debug log message"
 fslog::info("This is an info log message");
 fslog::warn("This is a warning log message");
 fslog::error("This is an error log message");
