@@ -33,10 +33,12 @@
 #define _FSLOG_PROCESS               inline std::string process
 #define _FSLOG_PROCESS_DEFAULT(type) _FSLOG_PROCESS(type arg) { return std::to_string(arg); }
 
-// Formatting types, edit these if you want your custom types to work with the formatting
+// Configuration
+
+#define _FSLOG_UPPER_PVOID 0
 
 namespace fslog {
-    namespace types {
+    namespace types { // Edit this as shown below for custom types
         _FSLOG_PROCESS_DEFAULT(int32_t)
         _FSLOG_PROCESS_DEFAULT(uint32_t)
         _FSLOG_PROCESS_DEFAULT(int64_t)
@@ -54,7 +56,11 @@ namespace fslog {
             }
 
             uintptr_t value = reinterpret_cast<uintptr_t>(arg);
-            const char hex_digits[] = "0123456789abcdef";
+            #if _FSLOG_UPPER_PVOID
+                const char hex_digits[] = "0123456789ABCDEF";
+            #else
+                const char hex_digits[] = "0123456789abcdef";
+            #endif
 
             char result[20] = {'\0'};
             int pos = sizeof(result) / sizeof(char) - 2;
@@ -90,9 +96,7 @@ namespace fslog {
     } // types
 }
 
-// Config
-
-#define _FSLOG_UPPER_PVOID    1
+// Testing
 
 #ifdef FSLOG_TEST
     #include "fslog_test.h"
