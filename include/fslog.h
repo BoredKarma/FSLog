@@ -194,7 +194,7 @@ namespace fslog {
             if (!num_args) return fmt;
 
             std::string result;
-            result.reserve(fmt_size + num_args * 10);
+            result.reserve(fmt_size + num_args * 5);
             const std::array<std::string, sizeof...(args)> fmt_args = { 
                 types::process(std::forward<Args>(args))... 
             };

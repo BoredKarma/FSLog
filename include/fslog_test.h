@@ -28,7 +28,7 @@ namespace fslog {
 
             size_t fmt_size = fmt.length();
             std::string result;
-            result.reserve(fmt_size + num_args * 10);
+            result.reserve(fmt_size + num_args * 5);
 
             for (size_t i = 0; i < fmt_size; ++i) {
                 if (fmt[i] != '{') {
