@@ -164,6 +164,7 @@ namespace fslog {
     static LogColors error_colors( FsColor::GRAY, FsColor::RED, FsColor::WHITE );
 
     static bool has_setup = false;
+    static void* console_handle = nullptr;
     
     void setup() {
         #if defined(_WIN32) || defined(_WIN64)
@@ -187,6 +188,7 @@ namespace fslog {
                 }
                 
                 has_setup = true;
+                console_handle = hOut;
             }
         #elif defined(__linux__)
             has_setup = true;
@@ -240,7 +242,7 @@ namespace fslog {
     namespace {
         INLINE void fs_write(const char* str, size_t length) {
             #if defined(_WIN32) || defined(_WIN64)
-                WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), str, static_cast<DWORD>(length), nullptr, nullptr);
+                WriteFile(console_handle, str, static_cast<DWORD>(length), NULL, NULL);
             #elif defined(__linux__)
                 syscall(SYS_write, STDOUT_FILENO, str, length);
             #endif
