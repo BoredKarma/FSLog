@@ -2,6 +2,8 @@
 
 FSLog is a simple, lightweight, and easy-to-use logging library for C++. It provides basic logging capabilities with different log levels and colored console output. The library is designed to be straightforward and not overly customizable.
 
+![Example](https://github.com/BoredKarma/FSLog/blob/main/images/example.jpg?raw=true)
+
 ## Features
 
 - **Okay Compatibility**: FSLog is compatible with:
