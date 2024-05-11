@@ -7,6 +7,7 @@ FSLog is a simple, lightweight, and easy-to-use logging library for C++. It prov
 ## Features
 
 - **Okay Compatibility**: FSLog is compatible with:
+    - **C++ Version**: C++11 and above.
     - **Platform**: Windows, Linux.
     - **Compiler**: Visual Studio, GCC, Clang.
 - **Different log levels**: FSLog supports different log levels including debug, info, warn, and error.
