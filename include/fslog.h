@@ -240,7 +240,7 @@ namespace fslog {
     } // fmt
     
     namespace {
-        INLINE void fs_write(const char* str, size_t length) {
+        INLINE void _fs_write(const char* str, size_t length) {
             #if defined(_WIN32) || defined(_WIN64)
                 WriteFile(console_handle, str, static_cast<DWORD>(length), nullptr, nullptr);
             #elif defined(__linux__)
@@ -279,6 +279,10 @@ namespace fslog {
         }
     } // details
 
+    INLINE void fs_write(const std::string& str) {
+        _fs_write(str.c_str(), str.length());
+    }
+
     template<typename... Args>
     void log(const std::string& type, const LogColors& colors, const std::string& fmt, Args&&... args) {
         if (!has_setup) { 
@@ -288,7 +292,7 @@ namespace fslog {
         std::string formatted = fslog::fmt::_format("{} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
-        fs_write(formatted.data(), formatted.length());
+        _fs_write(formatted.data(), formatted.length());
     }
 
     template<typename... Args>
@@ -301,7 +305,7 @@ namespace fslog {
             p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fslog::fmt::_format("{}:{}", call.file, call.line), colors), 
             fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
-        fs_write(formatted.data(), formatted.length());
+        _fs_write(formatted.data(), formatted.length());
     }
 
     template<typename... Args> void debug(const std::string& fmt, Args&&... args) {

@@ -10,7 +10,7 @@ int main(int, char**) {
             fslog::debug("The answer is {}", i);
     }
 
-    fslog::fs_write("\n", 1);
+    fslog::fs_write("\n");
     fslog::info("1000x fslog::debug() took {}ms", time_elapsed);
 
     int test = 42;
