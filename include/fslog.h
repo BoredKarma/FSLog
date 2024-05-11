@@ -221,7 +221,7 @@ namespace fslog {
         }
 
         template<typename... Args>
-        std::string format(const std::string& fmt, Args&&... args) {
+        INLINE std::string format(const std::string& fmt, Args&&... args) {
             #ifdef _FSLOG_EXP_STYLE_FMT
                 return fslog::exp_fmt::_format(fmt, std::forward<Args>(args)...);
             #else

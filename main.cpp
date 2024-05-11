@@ -20,7 +20,7 @@ int main(int, char**) {
     fslog::error(FS_META, "Problem!");
     fslog::error(FS_POINT);
 
-    fslog::debug("Log that uses C# styling, its {0} and {1}, {right}?", "cool", "awesome");
+    fslog::debug("Log that uses experimental C# styling, its {0} and {1}, {right}?", "cool", "awesome");
 
     // Custom custom = { 1, 2 };
     // fslog::error("The answer is {}", custom); error: static assertion failed: FSLOG_PROCESS: Unknown class type
