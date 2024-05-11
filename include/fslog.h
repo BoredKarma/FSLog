@@ -148,6 +148,9 @@ namespace fslog {
         FsColor bracket = FsColor::WHITE;
         FsColor prefix = FsColor::WHITE;
         FsColor text = FsColor::WHITE;
+
+        LogColors(FsColor _bracket, FsColor _prefix, FsColor _text) 
+                : bracket(_bracket), prefix(_prefix), text(_text) {}
     };
     struct CallInfo {
         std::string file;
@@ -155,10 +158,10 @@ namespace fslog {
     };
 
     // You can edit these as you like.
-    static LogColors debug_colors = { FsColor::GRAY, FsColor::BLUE, FsColor::WHITE };
-    static LogColors info_colors = { FsColor::GRAY, FsColor::CYAN, FsColor::WHITE };
-    static LogColors warn_colors = { FsColor::GRAY, FsColor::YELLOW, FsColor::WHITE };
-    static LogColors error_colors = { FsColor::GRAY, FsColor::RED, FsColor::WHITE };
+    static LogColors debug_colors( FsColor::GRAY, FsColor::BLUE, FsColor::WHITE );
+    static LogColors info_colors( FsColor::GRAY, FsColor::CYAN, FsColor::WHITE );
+    static LogColors warn_colors( FsColor::GRAY, FsColor::YELLOW, FsColor::WHITE );
+    static LogColors error_colors( FsColor::GRAY, FsColor::RED, FsColor::WHITE );
 
     static bool has_setup = false;
     
