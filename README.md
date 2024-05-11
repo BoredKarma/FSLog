@@ -42,4 +42,4 @@ fslog::debug(FS_POINT); // example: "[12:36:42] [DEBUG] [main.cpp:21] int main(i
 
 ## Credits
 
-Me: everything
+[Me](https://github.com/BoredKarma): everything
