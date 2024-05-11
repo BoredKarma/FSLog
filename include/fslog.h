@@ -35,7 +35,7 @@
 
 // Configuration
 
-#define _FSLOG_UPPER_PVOID 0
+#define _FSLOG_UPPER_HEX 0
 
 namespace fslog {
     namespace types { // Edit this as shown below for custom types
@@ -56,7 +56,7 @@ namespace fslog {
             }
 
             uintptr_t value = reinterpret_cast<uintptr_t>(arg);
-            #if _FSLOG_UPPER_PVOID
+            #if _FSLOG_UPPER_HEX
                 const char hex_digits[] = "0123456789ABCDEF";
             #else
                 const char hex_digits[] = "0123456789abcdef";
