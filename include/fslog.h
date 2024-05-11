@@ -294,7 +294,6 @@ namespace fslog {
         );
         _fs_write(formatted.data(), formatted.length());
     }
-
     template<typename... Args>
     void log(const std::string& type, const CallInfo& call, const LogColors& colors, const std::string& fmt, Args&&... args) {
         if (!has_setup) { 
