@@ -11,7 +11,6 @@
     #include <windows.h>
 #elif defined(__linux__)
     #include <unistd.h>
-    #include <sys/syscall.h>
 #else
     #error "Unsupported platform :("
 #endif
@@ -35,7 +34,8 @@
 
 // Configuration
 
-#define _FSLOG_UPPER_HEX 0
+#define FSLOG_UPPER_HEX             0
+#define FSLOG_IGNORE_WRITE_ERROR    1
 
 namespace fslog {
     namespace types { // Edit this as shown below for custom types
@@ -56,7 +56,7 @@ namespace fslog {
             }
 
             uintptr_t value = reinterpret_cast<uintptr_t>(arg);
-            #if _FSLOG_UPPER_HEX
+            #if FSLOG_UPPER_HEX
                 const char hex_digits[] = "0123456789ABCDEF";
             #else
                 const char hex_digits[] = "0123456789abcdef";
@@ -236,11 +236,11 @@ namespace fslog {
     } // fmt
     
     namespace {
-        INLINE void _fs_write(const char* str, size_t length) {
+        INLINE bool _fs_write(const char* str, size_t length) {
             #if defined(_WIN32) || defined(_WIN64)
-                WriteFile(console_handle, str, static_cast<DWORD>(length), nullptr, nullptr);
+                return WriteFile(console_handle, str, static_cast<DWORD>(length), nullptr, nullptr);
             #elif defined(__linux__)
-                syscall(SYS_write, STDOUT_FILENO, str, length);
+                return write(STDOUT_FILENO, str, length) != -1;
             #endif
         }
 
@@ -275,32 +275,36 @@ namespace fslog {
         }
     } // details
 
-    INLINE void fs_write(const std::string& str) {
-        _fs_write(str.c_str(), str.length());
+    INLINE bool fs_write(const std::string& str) {
+        return _fs_write(str.c_str(), str.length());
     }
 
     template<typename... Args>
     void log(const std::string& type, const LogColors& colors, const std::string& fmt, Args&&... args) {
-        if (!has_setup) { 
-            fslog::setup(); 
-        }
-
+        if (!has_setup) { fslog::setup(); }
         const std::string formatted = fslog::fmt::_format("{} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
-        _fs_write(formatted.data(), formatted.length());
+
+        bool success = _fs_write(formatted.data(), formatted.length());
+        #if !FSLOG_IGNORE_WRITE_ERROR
+            if (!success)
+                printf("fslog.h: Unable to write to console\n");
+        #endif
     }
     template<typename... Args>
     void log(const std::string& type, const CallInfo& call, const LogColors& colors, const std::string& fmt, Args&&... args) {
-        if (!has_setup) { 
-            fslog::setup(); 
-        }
-
+        if (!has_setup) { fslog::setup(); }
         const std::string formatted = fslog::fmt::_format("{} {} {} {}{}\n",
             p_brackets(get_time(), colors), p_brackets(type, colors), p_brackets(fslog::fmt::_format("{}:{}", call.file, call.line), colors), 
             fslog::setcolor(colors.text), fslog::fmt::format(fmt, std::forward<Args>(args)...)
         );
-        _fs_write(formatted.data(), formatted.length());
+
+        bool success = _fs_write(formatted.data(), formatted.length());
+        #if !FSLOG_IGNORE_WRITE_ERROR
+            if (!success)
+                printf("fslog.h: Unable to write to console\n");
+        #endif
     }
 
     template<typename... Args> void debug(const std::string& fmt, Args&&... args) {
