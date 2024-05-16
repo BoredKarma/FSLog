@@ -6,20 +6,19 @@
 
 double time_elapsed = 0;
 
-class Timer {
+class ScopeTimer {
 public:
-    explicit Timer(const std::string& name) : name_(name), start_(std::chrono::high_resolution_clock::now()) {}
-
-    ~Timer() {
+    explicit ScopeTimer() : start_(std::chrono::high_resolution_clock::now()) {}
+    
+    ~ScopeTimer() {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed = end - start_;
         time_elapsed = elapsed.count();
     }
 
-    Timer(const Timer&) = delete;
-    Timer& operator=(const Timer&) = delete;
+    ScopeTimer(const ScopeTimer&) = delete;
+    ScopeTimer& operator=(const ScopeTimer&) = delete;
 
 private:
-    std::string name_;
     std::chrono::time_point<std::chrono::high_resolution_clock> start_;
 };

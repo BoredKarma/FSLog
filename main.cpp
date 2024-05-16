@@ -4,14 +4,14 @@
 
 int main(int, char**) {
     {
-        Timer timer("1000x fslog::debug()");
+        ScopeTimer timer;
 
         for (int i = 0; i <= 1000; ++i)
             fslog::debug("The answer is {}", i);
     }
 
     fslog::fs_write("\n");
-    fslog::info("1000x fslog::debug() took {}ms", time_elapsed);
+    fslog::info("fslog::debug() on average took {}ms", time_elapsed / 1000);
 
     int test = 42;
     void* test2 = (void*)0x100;

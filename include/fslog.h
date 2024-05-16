@@ -45,6 +45,8 @@ namespace fslog {
         _FSLOG_PROCESS_DEFAULT(uint64_t)
         _FSLOG_PROCESS_DEFAULT(double)
         _FSLOG_PROCESS_DEFAULT(float)
+        _FSLOG_PROCESS_DEFAULT(long)
+        _FSLOG_PROCESS_DEFAULT(unsigned long)
 
         _FSLOG_PROCESS(bool arg) { return std::string(arg ? "true" : "false"); }
         _FSLOG_PROCESS(const std::string& arg) { return arg; }
