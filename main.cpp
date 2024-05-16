@@ -3,8 +3,9 @@
 #include "timer.h"
 
 int main(int, char**) {
+    double time_elapsed = 0;
     {
-        ScopeTimer timer;
+        ScopeTimer timer(time_elapsed);
 
         for (int i = 0; i <= 1000; ++i)
             fslog::debug("The answer is {}", i);
