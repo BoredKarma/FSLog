@@ -164,7 +164,7 @@ namespace fslog {
     static bool has_setup = false;
     static void* console_handle = nullptr;
     
-    void setup() {
+    static void setup() {
         #if defined(_WIN32) || defined(_WIN64)
             if (!has_setup) {
                 HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
